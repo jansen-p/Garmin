@@ -1,0 +1,7 @@
+*.png
+*.rds
+*.FIT
+*.gz
+*_backup
+*_checkpoints
+*.vscode
