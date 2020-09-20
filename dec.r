@@ -2,7 +2,7 @@ library(fit)
 library(tidyverse)
 library(ggmap)
 library(httr)
-library(ggpubr)
+#library(ggpubr)
 library(jsonlite)
 
 #input: int from FIT, out: string
@@ -32,10 +32,16 @@ to_duration <- function (t,x="h") {
 
 #km/h -> min/km
 to_pace <- function (t){
-	h <- 60/t
-	mins <- floor(h)
-	secs <- round((h-mins)*60)
-	ifelse(secs >= 60, paste(mins+1,":",secs-60,sep=""),paste(mins,":",secs,sep=""))
+	#h <- 60/t
+	#mins <- floor(h)
+	#secs <- round((h-mins)*60)
+	#ifelse(secs >= 60, paste(mins+1,":",secs-60,sep=""),paste(mins,":",secs,sep=""))
+	h <- 3600/t
+    #hours <- h%/%3600
+    mins <- h%%3600%/%60
+    secs <- h%%60
+    #paste0(hours,":",floor(mins),":",floor(secs))
+    paste0(floor(mins),":",floor(secs))
 }
 
 #m/s -> km/h
@@ -251,22 +257,30 @@ for (f in fit_files){
 									  bottom=min(points$pos_lat)-0.002,
 									  right=max(points$pos_long)+0.005,
 									  top=max(points$pos_lat)+0.002), zoom = 14)
-		plot <- ggmap(map, extent='panel') +
-			geom_path(aes(x = pos_long, y = pos_lat, colour = hr),data = points, size = 1.2) +
-			scale_colour_gradientn(colours = rainbow(3.5)) +
-			ggtitle("Map") + ylab('latitude') + xlab('longitude')
-
+		dput(map,paste0(filename,"_map.RData"))
+		#plot <- ggmap(map, extent='panel') +
+		#	geom_path(aes(x = pos_long, y = pos_lat, colour = hr),data = points, size = 1.2) +
+		#	scale_colour_gradientn(colours = rainbow(3.5)) +
+		#	ggtitle("Map") + ylab('latitude') + xlab('longitude')
 		#ggplot2::ggsave(paste0(filename,".png"))
 
-		plot2 <- ggmap(map, extent='panel') +
-			geom_path(aes(x = pos_long, y = pos_lat, colour = altitude),data = out$record, size = 1.2) +
-			scale_colour_gradientn(colours = rainbow(3.5)) +
-			ggtitle("Map") + ylab('latitude') + xlab('longitude')
+		#plot2 <- ggmap(map, extent='panel') +
+		#	geom_path(aes(x = pos_long, y = pos_lat, colour = altitude),data = out$record, size = 1.2) +
+		#	scale_colour_gradientn(colours = rainbow(3.5)) +
+		#	ggtitle("Map") + ylab('latitude') + xlab('longitude')
+		#ggplot2::ggsave(paste0(filename,"_alt.png"))
 
-		x <- ggarrange(plot, plot2, ncol = 2, nrow = 1, legend = "bottom")
-		ggplot2::ggsave(paste0(filename,"_test.png"))
+		#plot3 <- ggmap(map, extent='panel') +
+		#	geom_path(aes(x = pos_long, y = pos_lat, colour = speed),data = out$record, size = 1.2) +
+		#	scale_colour_gradientn(colours = rainbow(3.5)) +
+		#	ggtitle("Map") + ylab('latitude') + xlab('longitude')
+		#ggplot2::ggsave(paste0(filename,"_sp.png"))
+
+		#save(map, file = "my_map.RData")
+		##load(file = "my_map.RData")
+
+		##x <- ggarrange(plot, plot2, ncol = 2, nrow = 1, legend = "bottom")
+		##ggplot2::ggsave(paste0(filename,"_test.png"))
+		#break
 	}
-
-	saveRDS(out,paste0(filename,".rds"))
-	break
 }

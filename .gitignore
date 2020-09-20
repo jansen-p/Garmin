@@ -1,5 +1,6 @@
 *.png
 *.rds
+*.RData
 *.FIT
 *.gz
 *_backup

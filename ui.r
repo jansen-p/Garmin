@@ -19,7 +19,7 @@ ui <- tagList(
 									 "Hiking"),
 	    	             selected = "Swimming")
 				),
-				column(2,dateRangeInput("dates", "",start="2020-08-01"))
+				column(2,dateRangeInput("dates", "",start="2020-02-01"))
 				)
 	),
 	navbarPage(
@@ -28,16 +28,6 @@ ui <- tagList(
 		position="fixed-top",
 	    div(""),
 			tabPanel("Single Events",
-	
-				#switch between modes
-				radioButtons("stat_type", 
-	  			             label = "",#h4("Which type of data?"), 
-	  			             choices = list("Single Events", "Comparison"),
-	  			             selected = "Single Events"
-				),
-	
-	
-	
 				sidebarLayout(
 	    			sidebarPanel(
 						width=3,
@@ -52,22 +42,33 @@ ui <- tagList(
 					),
 	
 					mainPanel(
-						h2(div(textOutput("event_sing")),style="color:darkred"),
-						textOutput("graphs_sing"),
 						#tableOutput("kp"),
+						navbarPage(
+							div(""),
+							tabPanel("Speed+HR"),
+							tabPanel("Altitude"),
+							tabPanel("Lap"),
+							tabPanel("Map"),
+							tabPanel("Map Alt"),
+							tabPanel("Map Speed")
+						),
+						h2(div(textOutput("event_sing")),style="color:darkred"),
+						textOutput("graphs_sing")
 	    			)
-				)
+				),
+					sliderInput("width", "Plot Width", min = 300, max = 1500, value = 1000),
+            		sliderInput("height", "Plot Height", min = 300, max = 1500, value = 600)
 	  		),
 			tabPanel("Comparison",
 				sidebarLayout(
 					sidebarPanel(
-						width=3,
+						width=2,
 						uiOutput("graph_selection_comp")
 					),
 					mainPanel(
 						h2(div(textOutput("event_comp")),style="color:darkred"),
 						textOutput("graphs_comp"),
-				 		tableOutput("stats") #temporary 
+				 		dataTableOutput("stats") #temporary 
 					)
 				)
 			),

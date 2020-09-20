@@ -1,19 +1,19 @@
-RDS_DIR    := ACT_RDS
-ACT_DIR     := ACTIVITY
-COU_DIR     := COURSES
-PRO_DIR     := f
+RDS_DIR    := data/ACT_RDS
+ACT_DIR     := data/ACTIVITY
+COU_DIR     := data/COURSES
+PRO_DIR     := data/f
 
 #backup ACT_DIR, COU_DIR and RDS_DIR files
 backup:
-	cp -rf $(ACT_DIR)/* .ACTIVITY_backup
-	cp -rf $(COU_DIR)/* .COURSES_backup
-	cp -rf $(RDS_DIR)/* .ACT_RDS_backup
+	cp -rf $(ACT_DIR)/* data/.ACTIVITY_backup
+	cp -rf $(COU_DIR)/* data/.COURSES_backup
+	cp -rf $(RDS_DIR)/* data/.ACT_RDS_backup
 
 
 
 #copy FIT files from watch to ACT_DIR and COU_DIR
 fetch:
-	-./copy_act_courses.sh
+	-src/copy_act_courses.sh
 
 #decode FIT files, creates *.rds files
 decode:

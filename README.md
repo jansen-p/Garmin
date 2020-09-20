@@ -2,7 +2,7 @@
 Visualization for FIT-Files created by Garmin Forerunner 735XT using Shiny
 
 
-##Usage
+## Usage
 handled by makefile:
 
 1. **fetch:** mounts + unmounts the watch and copies new data to working dir
