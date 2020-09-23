@@ -7,8 +7,8 @@ library(fullcalendar)
 source('src/plots.r')
 source('src/helpers.r')
 
-files <- list.files('ACT_RDS')
-stats <- readRDS('ACT_RDS/stats.rds')
+files <- list.files('data/ACT_RDS')
+stats <- readRDS('data/ACT_RDS/stats.rds')
 
 data <- data.frame(title = paste("Event", 1:3),
                   start = c("2020-09-01", "2020-09-01", "2020-09-15"),
@@ -35,7 +35,7 @@ server <- function(input, output) {
 	observeEvent(input$event,{
 			if(input$sport_type != "Swimming" & is.character(input$event)){
 				name <- unlist(strsplit(input$event,' '))
-				rv$map <- dget(normalizePath(paste0('ACT_RDS/',gsub("[.]","-",name[1]),'_',gsub(":","-",name[4]),'_',input$sport_type,'_map.RData')))
+				rv$map <- dget(normalizePath(paste0('data/ACT_RDS/',gsub("[.]","-",name[1]),'_',gsub(":","-",name[4]),'_',input$sport_type,'_map.RData')))
 			}
 	})
 
@@ -203,7 +203,7 @@ server <- function(input, output) {
 						 name <- unlist(strsplit(input$event,' '))
 						 d <- gsub("[.]","-",name[1])
 						 t <- gsub(":","-",name[4])
-						 rv$cur_file <- readRDS(paste('ACT_RDS/',d,'_',t,'_',input$sport_type,'.rds',sep=""))
+						 rv$cur_file <- readRDS(paste('data/ACT_RDS/',d,'_',t,'_',input$sport_type,'.rds',sep=""))
 					 }
 	})
 
