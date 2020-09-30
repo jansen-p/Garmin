@@ -17,10 +17,10 @@ ui <- tagList(
 	    	                         "Biking",
 	    	                         "Swimming",
 									 "Hiking"),
-	    	             selected = "Swimming")
+	    	             selected = "Swimming")),
+				column(2,dateRangeInput("dates", "",start="2020-02-01")),
 				),
-				column(2,dateRangeInput("dates", "",start="2020-02-01"))
-				)
+				uiOutput("tag_filter")
 	),
 	navbarPage(
 		theme=shinytheme("darkly"),
@@ -33,6 +33,18 @@ ui <- tagList(
 						width=3,
 						uiOutput("files_sport"),
 						uiOutput("graph_selection_sing"),
+
+						textInput('tag',''),
+						fluidRow(
+								column(3,actionButton('tag_insert','Add tag')),
+								column(4,actionButton('tag_delete','Delete last tag')),
+								column(3,actionButton('tag_update','Save changes'))
+						),
+						h3('Tags of current file:'),
+						textOutput('tag_output'),
+						h3('Filter by tags:'),
+						textOutput('tag_sel'),
+
 						h3(div("Overall statistics"),style="color:darkred"),
 						fluidRow(
 							column(4,htmlOutput("cur_stat_l")),
@@ -53,6 +65,8 @@ ui <- tagList(
 							tabPanel("Map Speed")
 						),
 						h2(div(textOutput("event_sing")),style="color:darkred"),
+						h3('All tags:'),
+						tableOutput('tag_all'),
 						textOutput("graphs_sing")
 	    			)
 				),

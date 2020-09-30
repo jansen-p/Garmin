@@ -186,7 +186,7 @@ req <- function(p){
 		elev_req
 }
 
-act_files <- list.files('f/')
+act_files <- list.files('data/f/')
 #contains all fit files to be processed
 fit_files <- c()
 for (f in act_files){
@@ -198,8 +198,10 @@ for (f in act_files){
 	}
 }
 
+taglist <- data.frame()
+
 for (f in fit_files){
-	file <- read.fit(paste('f/',f,'.FIT',sep=""))
+	file <- read.fit(paste('data/f/',f,'.FIT',sep=""))
 
 	file_sport_type <- get_sport(file$sport$sport)
 	file_date <- to_date(file$session$start_time)
@@ -219,8 +221,13 @@ for (f in fit_files){
 	out$session <- clean_frame(file_session)
 	out$lap <- clean_frame(file_lap)
 	out$record <- clean_frame(file_record)
+	out$tags <- c('Test_tag')
 
-	filename <- paste0("ACT_RDS/",gsub(":","-",gsub(" ","_",file_date)),"_",file_sport_type)
+	if(!out$tags %in% taglist){
+		taglist <- c(taglist,out$tags)
+	}
+
+	filename <- paste0("data/ACT_RDS/",gsub(":","-",gsub(" ","_",file_date)),"_",file_sport_type)
 	print(paste("Processing",filename,"..."))
 	print("")
 
@@ -250,37 +257,14 @@ for (f in fit_files){
 		out$session$total_ascent2 <- asc
 		out$session$total_descent2 <- dsc
 
-
 		#create maps from lon/lat values
-		#points <- subset(out$record, complete.cases(out$record))
 		map <- get_stamenmap(bbox = c(left=min(points$pos_long)-0.005,
 									  bottom=min(points$pos_lat)-0.002,
 									  right=max(points$pos_long)+0.005,
 									  top=max(points$pos_lat)+0.002), zoom = 14)
 		dput(map,paste0(filename,"_map.RData"))
-		#plot <- ggmap(map, extent='panel') +
-		#	geom_path(aes(x = pos_long, y = pos_lat, colour = hr),data = points, size = 1.2) +
-		#	scale_colour_gradientn(colours = rainbow(3.5)) +
-		#	ggtitle("Map") + ylab('latitude') + xlab('longitude')
-		#ggplot2::ggsave(paste0(filename,".png"))
-
-		#plot2 <- ggmap(map, extent='panel') +
-		#	geom_path(aes(x = pos_long, y = pos_lat, colour = altitude),data = out$record, size = 1.2) +
-		#	scale_colour_gradientn(colours = rainbow(3.5)) +
-		#	ggtitle("Map") + ylab('latitude') + xlab('longitude')
-		#ggplot2::ggsave(paste0(filename,"_alt.png"))
-
-		#plot3 <- ggmap(map, extent='panel') +
-		#	geom_path(aes(x = pos_long, y = pos_lat, colour = speed),data = out$record, size = 1.2) +
-		#	scale_colour_gradientn(colours = rainbow(3.5)) +
-		#	ggtitle("Map") + ylab('latitude') + xlab('longitude')
-		#ggplot2::ggsave(paste0(filename,"_sp.png"))
-
-		#save(map, file = "my_map.RData")
-		##load(file = "my_map.RData")
-
-		##x <- ggarrange(plot, plot2, ncol = 2, nrow = 1, legend = "bottom")
-		##ggplot2::ggsave(paste0(filename,"_test.png"))
-		#break
+		saveRDS(out,paste0(filename,".rds"))
 	}
+	break
 }
+saveRDS(taglist,"data/ACT_RDS/taglist.rds")

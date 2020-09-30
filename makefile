@@ -28,7 +28,8 @@ stats:
 
 #launch the UI
 launch:
-	R -e "shiny::runApp('../Garmin')" &
+	Rscript src/launch.r
+	#R -e "shiny::runApp('../Garmin')" &
 
 #convert all FIT files, remove stats.rds and recreate it
 all: fetch decode stats

@@ -20,6 +20,13 @@ data2 <- data.frame(title = stats$sport[-1],
 					color = unlist(lapply(stats$sport, function(x) if(x=="Running") "Darkyellow" else if(x=="Hiking") "Green" else if(x=="Swimming") "Darkblue" else if(x=="Biking") "Brown"))
 					)
 
+get_filename <- function(event, type){
+	name <- unlist(strsplit(event,' '))
+	d <- gsub("[.]","-",name[1])
+	t <- gsub(":","-",name[4])
+	paste('data/ACT_RDS/',d,'_',t,'_',type,'.rds',sep="")
+}
+
 ggplot_height <- 600
 
 server <- function(input, output) {
@@ -27,6 +34,7 @@ server <- function(input, output) {
 	#file <- data.frame()
 	rv <- reactiveValues(cur_file = data.frame(), #file for the current selected event
 						 substats = data.frame(),
+						 tag_list =  readRDS('data/ACT_RDS/taglist.rds'),
 						 graph_selection = c(), #lists for graphs
 						 map = c(), #stamenmap for ggmap
 						 inserted_sing = c(),
@@ -179,6 +187,58 @@ server <- function(input, output) {
 		 rv$cur_file$session
 	)
 
+	output$tag_output <- renderText(rv$cur_file$tags)
+	output$tag_sel <- renderText(input$filter)
+	output$tag_all <- renderTable(rv$tag_list)
+
+	observeEvent(input$tag_insert,{
+
+		#add to tags for cur_file
+		if(!input$tag %in% rv$cur_file$tags){
+			rv$cur_file$tags <- c(rv$cur_file$tags,input$tag)
+		}
+
+		if(input$tag %in% names(rv$tag_list)){
+			if(!input$event %in% rv$tag_list[[input$tag]]){
+				rv$tag_list[[input$tag]] <- c(rv$tag_list[[input$tag]], input$event)
+			}
+		}
+		else{
+			rv$tag_list[[input$tag]] <- c(input$event)
+		}
+
+		saveRDS(rv$cur_file,get_filename(input$event, input$sport_type))
+		saveRDS(rv$tag_list,'data/ACT_RDS/taglist.rds')
+	})
+
+	observeEvent(input$tag_delete,{
+		if(!is.null(rv$cur_file$tags)){
+			#delete last element
+			itm <- rv$cur_file$tags[length(rv$cur_file$tags)]
+			rv$cur_file$tags <- rv$cur_file$tags[-length(rv$cur_file$tags)]
+
+			print(paste(itm %in% names(rv$tag_list),"   ",length(unlist(rv$tag_list[itm])) > 1))
+			if(itm %in% names(rv$tag_list) & length(unlist(rv$tag_list[itm])) > 1){
+				print("IF")
+				lst <- unlist(rv$tag_list[itm])
+				rv$tag_list[[itm]] <- lst[lst != input$event]
+			}
+			else{
+				print("ELSE")
+				rv$tag_list[[itm]] <- c()
+			}
+		}
+		saveRDS(rv$cur_file,get_filename(input$event, input$sport_type))
+		saveRDS(rv$tag_list,'data/ACT_RDS/taglist.rds')
+	})
+	output$tag_filter <- renderUI({
+		pickerInput("filter", "Tag filter",
+					choices=names(rv$tag_list),
+					options = list(`actions-box` = TRUE),
+					multiple = TRUE
+		)
+	})
+
 
 	#set the substats dataframe, depending on date, sporttype and screen
 	observeEvent({input$dates
@@ -199,12 +259,9 @@ server <- function(input, output) {
 
 	#read file matching to selected event
 	observeEvent(input$event,{
-					 if(is.character(input$event)){
-						 name <- unlist(strsplit(input$event,' '))
-						 d <- gsub("[.]","-",name[1])
-						 t <- gsub(":","-",name[4])
-						 rv$cur_file <- readRDS(paste('data/ACT_RDS/',d,'_',t,'_',input$sport_type,'.rds',sep=""))
-					 }
+		if(is.character(input$event)){
+		    rv$cur_file <- readRDS(get_filename(input$event, input$sport_type))
+		}
 	})
 
 	#Single Event - Event selection title
@@ -219,6 +276,13 @@ server <- function(input, output) {
 		cleaned_f <- unlist(lapply(f,function(x) paste(gsub("-",".",substr(x,1,10)),
 													   "- ",
 													   gsub("-",":",substr(x,12,19)))))
+
+
+		flt <- input$filter
+		if(is.character(flt)){
+			cleaned_f <- cleaned_f[sapply(cleaned_f, function(x) x %in% unlist(rv$tag_list[c(flt)]))]
+		}
+
 		pickerInput("event", textOutput("date_range"),
 					choices=cleaned_f,
 					options = list(`actions-box` = TRUE),
